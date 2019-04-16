@@ -1,0 +1,54 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+    "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+    <interface name="wifi.helper.Station">
+        <method name="Select" >
+            <arg name="iface" type="s" direction="in"/>
+        </method>
+        <method name="Connect" />
+        <method name="Disconnect" />
+        <method name="Save" />
+        <method name="Scan" />
+
+        <signal name="StatusChanged">
+            <!--
+            参数：status
+            摘要：该参数表示 WIFI 的状态的 JSON 格式数据
+            数据结构：
+                ssid        已连接WIFI的SSID
+                bssid       已连接WIFI的SSID
+                ipAddress   已连接WIFI的IP地址
+                state       已连接WIFI的状态
+                security    已连接WIFI的安全认证
+                rssi        已连接WIFI的信号强度
+            -->
+            <arg name="status" type="s" direction="out"/>
+        </signal>
+        <signal name="AccessPointUpdate">
+            <!--
+            参数: point
+            摘要: 该参数表示已更新 WIFI 接入点的 JSON 格式数据
+            数据结构:
+                bssid       接入点的SSID
+                ssid        接入点的SSID
+                frequency   接入点的频率
+                rssi        接入点的信号强度
+                securitys   接入点的安全认证方式列表
+                                NoneOpen        = 0x00
+                                NoneWEP         = 0x01
+                                NoneWEPShared   = 0x02
+                                IEEE8021X       = 0x04
+                                WPA_PSK         = 0x08
+                                WPA_EAP         = 0x10
+                                WPA2_PSK        = 0x20
+                                WPA2_EAP        = 0x40
+                encrytions  接入点的加密方式列表
+                                None    = 0x00
+                                WEP     = 0x01
+                                TKIP    = 0x02
+                                CCMP    = 0x04
+            -->
+            <arg name="point" type="s" direction="out"/>
+        </signal>
+    </interface>
+</node>

@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>PageWiFiConnect.qml</file>
+        <file>PageWiFiConnectForm.ui.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>res/wifi_level_0.png</file>
+        <file>res/wifi_level_1.png</file>
+        <file>res/wifi_level_2.png</file>
+        <file>res/wifi_level_3.png</file>
+        <file>DialogWifiInput.qml</file>
+        <file>DialogWifiInputForm.ui.qml</file>
+    </qresource>
+</RCC>
