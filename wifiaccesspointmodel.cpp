@@ -68,6 +68,13 @@ void WifiAccessPointModel::componentComplete()
     m_componentCompleted = true;
 }
 
+void WifiAccessPointModel::addNetwork(const QString &ssid,
+                                      const QString &password)
+{
+    WifiClient *client = WifiClient::instance();
+    client->addNetwork(ssid, password);
+}
+
 void WifiAccessPointModel::onAccessPointUpdate(const QString &point)
 {
     beginResetModel();

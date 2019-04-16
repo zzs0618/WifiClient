@@ -26,6 +26,7 @@ class WifiClient : public QObject
     Q_OBJECT
 public:
     static WifiClient *instance();
+    void addNetwork(const QString &ssid, const QString &password);
 
 signals:
     void accessPointUpdate(const QString &point);

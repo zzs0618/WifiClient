@@ -2,13 +2,18 @@
     "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
     <interface name="wifi.helper.Station">
-        <method name="Select" >
-            <arg name="iface" type="s" direction="in"/>
+        <method name="Open" />
+        <method name="Close" />
+        <method name="AddNetwork" >
+            <arg name="ssid" type="s" direction="in"/>
+            <arg name="password" type="s" direction="in"/>
         </method>
-        <method name="Connect" />
-        <method name="Disconnect" />
-        <method name="Save" />
-        <method name="Scan" />
+        <method name="SelectNetwork" >
+            <arg name="id" type="i" direction="in"/>
+        </method>
+        <method name="RemoveNetwork" >
+            <arg name="id" type="i" direction="in"/>
+        </method>
 
         <signal name="StatusChanged">
             <!--

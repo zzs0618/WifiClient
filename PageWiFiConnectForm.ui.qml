@@ -90,7 +90,7 @@ Item {
 
             onSubmit: {
                 dialog.close();
-
+                wifiAPModel.addNetwork(ssid, password)
                 console.log("Ok clicked", password)
             }
             onCancel: {

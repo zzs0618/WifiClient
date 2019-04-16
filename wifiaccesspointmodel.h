@@ -39,6 +39,8 @@ public:
     void classBegin() {}
     void componentComplete();
 
+    Q_INVOKABLE void addNetwork(const QString &ssid, const QString &password);
+
 protected slots:
     void onAccessPointUpdate(const QString &point);
 

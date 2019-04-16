@@ -42,6 +42,11 @@ WifiClient *WifiClient::instance()
     return client;
 }
 
+void WifiClient::addNetwork(const QString &ssid, const QString &password)
+{
+    station->AddNetwork(ssid, password);
+}
+
 void WifiClient::onAccessPointUpdate(const QString &point)
 {
     Q_EMIT accessPointUpdate(point);
