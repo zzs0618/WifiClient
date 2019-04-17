@@ -23,6 +23,7 @@
 #include <QtQml/qqmlparserstatus.h>
 #include <QtQml/qjsvalue.h>
 
+class SortFilterProxyModelPrivate;
 class SortFilterProxyModel : public QSortFilterProxyModel,
     public QQmlParserStatus
 {
@@ -81,7 +82,16 @@ protected:
     QHash<int, QByteArray> roleNames() const;
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
 
+    //From QSortFilterProxyModel
+    bool lessThan(const QModelIndex &source_left,
+                  const QModelIndex &source_right) const Q_DECL_OVERRIDE;
+
+protected:
+    SortFilterProxyModelPrivate *d_ptr;
+
 private:
+    Q_DISABLE_COPY(SortFilterProxyModel)
+    Q_DECLARE_PRIVATE(SortFilterProxyModel)
     bool m_complete;
     QByteArray m_sortRole;
     QByteArray m_filterRole;

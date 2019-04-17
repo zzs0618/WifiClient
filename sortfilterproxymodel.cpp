@@ -20,8 +20,93 @@
 #include <QtDebug>
 #include <QtQml>
 
-SortFilterProxyModel::SortFilterProxyModel(QObject *parent) :
-    QSortFilterProxyModel(parent), m_complete(false)
+
+
+class SortFilterProxyModelPrivate
+{
+    Q_DECLARE_PUBLIC(SortFilterProxyModel)
+public:
+    SortFilterProxyModelPrivate(SortFilterProxyModel *p);
+    virtual ~SortFilterProxyModelPrivate();
+
+    static int fuzzyCompare(float left, float right);
+    static int fuzzyCompare(double left, double right);
+    static qint64 variantCompare(const QVariant &left,
+                                 const QVariant &right,
+                                 Qt::CaseSensitivity cs, bool isLocaleAware);
+public:
+    SortFilterProxyModel *q_ptr;
+};
+
+SortFilterProxyModelPrivate::SortFilterProxyModelPrivate(
+                SortFilterProxyModel *p)
+    : q_ptr(p)
+{
+}
+
+SortFilterProxyModelPrivate::~SortFilterProxyModelPrivate()
+{
+}
+
+int SortFilterProxyModelPrivate::fuzzyCompare(float left, float right)
+{
+    return qFuzzyCompare(left, right) ? 0 : (left < right ? -1 : 1);
+}
+
+int SortFilterProxyModelPrivate::fuzzyCompare(double left, double right)
+{
+    return qFuzzyCompare(left, right) ? 0 : (left < right ? -1 : 1);
+}
+
+qint64 SortFilterProxyModelPrivate::variantCompare(
+                const QVariant &left,
+                const QVariant &right,
+                Qt::CaseSensitivity cs, bool isLocaleAware)
+{
+    if (left.userType() == QVariant::Invalid &&
+        right.userType() == QVariant::Invalid) {
+        return 0;
+    } else if(left.userType() == QVariant::Invalid) {
+        return 1;
+    } else if (right.userType() == QVariant::Invalid) {
+        return -1;
+    }
+    switch (left.userType()) {
+        case QVariant::Int:
+            return left.toInt() - right.toInt();
+        case QVariant::UInt:
+            return left.toInt() - right.toInt();
+        case QVariant::LongLong:
+            return left.toLongLong() - right.toLongLong();
+        case QVariant::ULongLong:
+            return left.toLongLong() - right.toLongLong();
+        case QMetaType::Float:
+            return fuzzyCompare(left.toFloat(), right.toFloat()) ;
+        case QVariant::Double:
+            return fuzzyCompare(left.toDouble(), right.toDouble()) ;
+        case QVariant::Char:
+            return left.toInt() - right.toInt();
+        case QVariant::Date:
+            return right.toDate().daysTo(left.toDate());
+        case QVariant::Time:
+            return  right.toTime().msecsTo(left.toTime());
+        case QVariant::DateTime:
+            return  right.toDateTime().msecsTo(left.toDateTime());
+        case QVariant::String:
+        default:
+            if (isLocaleAware) {
+                return left.toString().localeAwareCompare(right.toString());
+            } else {
+                return left.toString().compare(right.toString(), cs);
+            }
+    }
+}
+
+
+SortFilterProxyModel::SortFilterProxyModel(QObject *parent)
+    : QSortFilterProxyModel(parent)
+    , d_ptr(new SortFilterProxyModelPrivate(this))
+    , m_complete(false)
 {
     connect(this, &QSortFilterProxyModel::rowsInserted, this,
             &SortFilterProxyModel::countChanged);
@@ -41,6 +126,7 @@ QObject *SortFilterProxyModel::source() const
 
 void SortFilterProxyModel::setSource(QObject *source)
 {
+    Q_D(SortFilterProxyModel);
     setSourceModel(qobject_cast<QAbstractItemModel *>(source));
 }
 
@@ -181,4 +267,33 @@ bool SortFilterProxyModel::filterAcceptsRow(int sourceRow,
     }
     QString key = model->data(sourceIndex, roleKey(filterRole())).toString();
     return key.contains(rx);
+}
+
+//From QSortFilterProxyModel
+bool SortFilterProxyModel::lessThan(const QModelIndex &source_left,
+                                    const QModelIndex &source_right) const
+{
+    Q_D(const SortFilterProxyModel);
+
+    QList<QByteArray> sortRoles = m_sortRole.split(',');
+
+    if(sortRoles.isEmpty()) {
+        return source_left.row() < source_right.row();
+    }
+
+    for(const QByteArray &name : sortRoles) {
+        int role = roleNames().key(name);
+        QVariant l = (source_left.model() ? source_left.model()->data(source_left,
+                      role) : QVariant());
+        QVariant r = (source_right.model() ? source_right.model()->data(source_right,
+                      role) : QVariant());
+        qint64 compare = SortFilterProxyModelPrivate::variantCompare(l, r,
+                         sortCaseSensitivity(), isSortLocaleAware());
+        if(compare < 0) {
+            return true;
+        } else if(compare > 0) {
+            return false;
+        }
+    }
+    return false;
 }

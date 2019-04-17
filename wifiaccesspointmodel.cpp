@@ -27,8 +27,22 @@ WifiAccessPointModel::WifiAccessPointModel(QObject *parent) :
     QAbstractListModel(parent)
 {
     WifiClient *client = WifiClient::instance();
-    connect(client, SIGNAL(accessPointUpdate(QString)),
-            SLOT(onAccessPointUpdate(QString)));
+    connect(client, SIGNAL(statusChanged(QString)),
+            SLOT(onStatusChanged(QString)));
+    connect(client, SIGNAL(accessPointAdded(QString)),
+            SLOT(onAccessPointAdded(QString)));
+    connect(client, SIGNAL(accessPointUpdated(QString)),
+            SLOT(onAccessPointUpdated(QString)));
+    connect(client, SIGNAL(accessPointRemoved(QString)),
+            SLOT(onAccessPointRemoved(QString)));
+
+    m_status = client->status();
+    m_wifiAPs = client->accessPoints();
+}
+
+QVariantMap WifiAccessPointModel::status() const
+{
+    return m_status;
 }
 
 int WifiAccessPointModel::rowCount(const QModelIndex &) const
@@ -57,7 +71,9 @@ QHash<int, QByteArray> WifiAccessPointModel::roleNames() const
     static QHash<int, QByteArray> roles = {
         {Qt::DisplayRole + 1, "ssid"},
         {Qt::DisplayRole + 2, "bssid"},
-        {Qt::DisplayRole + 3, "signalLevel"}
+        {Qt::DisplayRole + 3, "signalLevel"},
+        {Qt::DisplayRole + 4, "type"},
+        {Qt::DisplayRole + 5, "ipAddress"}
     };
 
     return roles;
@@ -75,12 +91,19 @@ void WifiAccessPointModel::addNetwork(const QString &ssid,
     client->addNetwork(ssid, password);
 }
 
-void WifiAccessPointModel::onAccessPointUpdate(const QString &point)
+void WifiAccessPointModel::onStatusChanged(const QString &status)
 {
-    beginResetModel();
+    QJsonDocument doc = QJsonDocument::fromJson(status.toUtf8());
+    m_status = doc.toVariant().toMap();
+    Q_EMIT statusChanged();
+}
 
+void WifiAccessPointModel::onAccessPointAdded(const QString &point)
+{
     QJsonDocument doc = QJsonDocument::fromJson(point.toUtf8());
-    m_wifiAPs.clear();
+    int first = m_wifiAPs.length();
+    int last = first + doc.array().count() - 1;
+    beginInsertRows(QModelIndex(), first, last);
     for(QVariant var : doc.array().toVariantList()) {
         QVariantMap map = var.toMap();
         int rssi = map.value("rssi").toInt();
@@ -97,7 +120,56 @@ void WifiAccessPointModel::onAccessPointUpdate(const QString &point)
         map.insert("signalLevel", level);
         m_wifiAPs << map;
     }
-
-    endResetModel();
+    endInsertRows();
 }
 
+void WifiAccessPointModel::onAccessPointUpdated(const QString &point)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(point.toUtf8());
+    for(QVariant var : doc.array().toVariantList()) {
+        QVariantMap map = var.toMap();
+        int i = indexOf(map["ssid"].toString());
+
+        if(i >= 0) {
+            int rssi = map.value("rssi").toInt();
+            int level = 0;
+            if(rssi < -85) {
+                level = 0;
+            } else if(rssi < -70) {
+                level = 1;
+            } else if(rssi < -55) {
+                level = 2;
+            } else {
+                level = 3;
+            }
+            map.insert("signalLevel", level);
+            m_wifiAPs[i] = map;
+            Q_EMIT this->dataChanged(index(i), index(i));
+        }
+    }
+}
+
+void WifiAccessPointModel::onAccessPointRemoved(const QString &point)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(point.toUtf8());
+    for(QVariant var : doc.array().toVariantList()) {
+        QVariantMap map = var.toMap();
+        int i = indexOf(map["ssid"].toString());
+        if(i >= 0) {
+            beginRemoveRows(QModelIndex(), i, i);
+            m_wifiAPs.removeAt(i);
+            endRemoveRows();
+        }
+    }
+}
+
+int WifiAccessPointModel::indexOf(const QString &ssid)
+{
+    for(int i = 0; i < m_wifiAPs.length(); ++i) {
+        QVariantMap map = m_wifiAPs[i].toMap();
+        if(map["ssid"].toString() == ssid) {
+            return i;
+        }
+    }
+    return -1;
+}

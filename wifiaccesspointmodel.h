@@ -25,9 +25,12 @@
 class WifiAccessPointModel : public QAbstractListModel, public QQmlParserStatus
 {
     Q_OBJECT
+    Q_PROPERTY(QVariantMap status READ status NOTIFY statusChanged)
     Q_INTERFACES(QQmlParserStatus)
 public:
     explicit WifiAccessPointModel(QObject *parent = nullptr);
+
+    QVariantMap status() const;
 
     //From QAbstractListModel
     int rowCount(const QModelIndex & = QModelIndex()) const Q_DECL_OVERRIDE;
@@ -41,11 +44,21 @@ public:
 
     Q_INVOKABLE void addNetwork(const QString &ssid, const QString &password);
 
+signals:
+    void statusChanged();
+
 protected slots:
-    void onAccessPointUpdate(const QString &point);
+    void onStatusChanged(const QString &status);
+    void onAccessPointAdded(const QString &point);
+    void onAccessPointUpdated(const QString &point);
+    void onAccessPointRemoved(const QString &point);
+
+protected:
+    int indexOf(const QString &ssid);
 
 private:
     bool m_componentCompleted = false;
+    QVariantMap m_status;
     QVariantList m_wifiAPs;
 };
 

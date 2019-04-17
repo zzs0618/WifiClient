@@ -26,16 +26,23 @@ class WifiClient : public QObject
     Q_OBJECT
 public:
     static WifiClient *instance();
+
+    QVariantMap status() const;
+
+    QVariantList accessPoints() const;
+
     void addNetwork(const QString &ssid, const QString &password);
 
 signals:
-    void accessPointUpdate(const QString &point);
+    void accessPointAdded(const QString &point);
+    void accessPointUpdated(const QString &point);
+    void accessPointRemoved(const QString &point);
     void statusChanged(const QString &status);
 
 public slots:
 
 protected slots:
-    void onAccessPointUpdate(const QString &point);
+    void onAccessPointUpdated(const QString &point);
     void onStatusChanged(const QString &status);
 
 private:

@@ -10,7 +10,7 @@ PageWiFiConnectForm {
     listWLAN.model: SortFilterProxyModel {
         id: proxyModel
         source: wifiAPModel
-        sortRole: "signalLevel"
+        sortRole: "type,signalLevel"
         sortOrder: Qt.DescendingOrder
     }
 

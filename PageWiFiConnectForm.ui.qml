@@ -1,7 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.1
-//import QtQuick.Controls.Material 2.1
 
+//import QtQuick.Controls.Material 2.1
 Item {
     property alias listWLAN: listWLAN
 
@@ -9,7 +9,7 @@ Item {
         id: titleWLAN
         width: parent.width
         height: 50
-//        Material.elevation: 5
+        //        Material.elevation: 5
         z: 1
 
         Text {
@@ -34,8 +34,14 @@ Item {
         height: 10
         z: 1
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "lightgray" }
-            GradientStop { position: 1.0; color: "white" }
+            GradientStop {
+                position: 0.0
+                color: "lightgray"
+            }
+            GradientStop {
+                position: 1.0
+                color: "white"
+            }
         }
     }
 
@@ -45,6 +51,52 @@ Item {
         anchors.topMargin: titleWLAN.height + 10
         anchors.leftMargin: 15
         anchors.rightMargin: 15
+        section.property: "type"
+        section.criteria: ViewSection.FullString
+        section.delegate: Component {
+            Rectangle {
+                width: listWLAN.width
+                height: 16
+                color: "lightgray"
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: section == "2" ? qsTr("当前的WLAN") :
+                                           (section == "1" ? qsTr("已连接的WLAN") :
+                                                             qsTr("选取附近的WLAN"))
+                    font.pixelSize: 12
+                    color: "gray"
+                }
+            }
+        }
+
+        model: ListModel {
+            ListElement {
+                type: 0
+                ssid: "Net1"
+                signalLevel: 3
+            }
+            ListElement {
+                type: 1
+                ssid: "Net2"
+                signalLevel: 3
+            }
+            ListElement {
+                type: 1
+                ssid: "Net3"
+                signalLevel: 3
+            }
+            ListElement {
+                type: 2
+                ssid: "Net4"
+                signalLevel: 3
+            }
+            ListElement {
+                type: 2
+                ssid: "Net5"
+                signalLevel: 3
+            }
+        }
+
         delegate: Item {
             x: 5
             width: listWLAN.width
@@ -60,14 +112,14 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     elide: Text.ElideRight
                     color: "#4CAF50"
-                    text: ssid
+                    text: if(type==2) return ssid + "("+ wifiAPModel.status["ipAddress"] +")"; else return ssid;
                 }
             }
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
                     dialog.title = ssid
-                    dialog.open();
+                    dialog.open()
                 }
             }
         }
@@ -78,8 +130,10 @@ Item {
         width: parent.width
         height: parent.height
         modal: true
-        header: Item{}
-        background: Item{}
+        header: Item {
+        }
+        background: Item {
+        }
 
         DialogWifiInput {
             id: wifiInput
@@ -89,12 +143,12 @@ Item {
             title: dialog.title
 
             onSubmit: {
-                dialog.close();
+                dialog.close()
                 wifiAPModel.addNetwork(ssid, password)
                 console.log("Ok clicked", password)
             }
             onCancel: {
-                dialog.close();
+                dialog.close()
 
                 console.log("Cancel clicked")
             }
