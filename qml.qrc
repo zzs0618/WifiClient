@@ -10,5 +10,10 @@
         <file>res/wifi_level_3.png</file>
         <file>DialogWifiInput.qml</file>
         <file>DialogWifiInputForm.ui.qml</file>
+        <file>PageWiFiDirect.qml</file>
+        <file>PageWiFiDirectForm.ui.qml</file>
+        <file>res/p2p_device_0.png</file>
+        <file>res/p2p_device_1.png</file>
+        <file>res/p2p_device_2.png</file>
     </qresource>
 </RCC>

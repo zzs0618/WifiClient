@@ -33,17 +33,27 @@ public:
 
     void addNetwork(const QString &ssid, const QString &password);
 
+    void p2pStart();
+    void p2pStop();
+    void p2pConnectPBC(const QString &address);
+
 signals:
     void accessPointAdded(const QString &point);
     void accessPointUpdated(const QString &point);
     void accessPointRemoved(const QString &point);
     void statusChanged(const QString &status);
+    void enabledChanged();
+
+    void p2pDeviceFound(const QString &devcie);
 
 public slots:
 
 protected slots:
     void onAccessPointUpdated(const QString &point);
     void onStatusChanged(const QString &status);
+
+    void onServiceRegistered(const QString &service);
+    void onServiceUnregistered(const QString &service);
 
 private:
     explicit WifiClient(QObject *parent = nullptr);

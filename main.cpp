@@ -22,6 +22,7 @@
 
 #include "sortfilterproxymodel.h"
 #include "wifiaccesspointmodel.h"
+#include "wifip2pdevicemodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<SortFilterProxyModel>("Wifi", 1, 0, "SortFilterProxyModel");
     qmlRegisterType<WifiAccessPointModel>("Wifi", 1, 0, "WifiAccessPointModel");
+    qmlRegisterType<WifiP2PDeviceModel>("Wifi", 1, 0, "WifiP2PDeviceModel");
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QLatin1String("qrc:/main.qml")));

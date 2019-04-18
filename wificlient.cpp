@@ -21,8 +21,10 @@
 #include <QDebug>
 
 #include "station_interface.h"
+#include "peers_interface.h"
 
 wifi::helper::Station *station = NULL;
+wifi::helper::Peers *peers = NULL;
 
 WifiClient::WifiClient(QObject *parent) : QObject(parent)
 {
@@ -40,6 +42,18 @@ WifiClient::WifiClient(QObject *parent) : QObject(parent)
             SLOT(onAccessPointUpdated(QString)));
     connect(station, SIGNAL(StatusChanged(QString)),
             SLOT(onStatusChanged(QString)));
+
+    peers = new wifi::helper::Peers("wifi.helper.service",
+                                    "/Peers",
+                                    QDBusConnection::systemBus());
+    connect(peers, SIGNAL(DeviceFound(QString)), SIGNAL(p2pDeviceFound(QString)));
+
+    QDBusServiceWatcher *wather = new QDBusServiceWatcher("wifi.helper.service",
+            QDBusConnection::systemBus(), QDBusServiceWatcher::WatchForOwnerChange, this);
+    connect(wather, SIGNAL(serviceRegistered(QString)),
+            SLOT(onServiceRegistered(QString)));
+    connect(wather, SIGNAL(serviceUnregistered(QString)),
+            SLOT(onServiceUnregistered(QString)));
 }
 
 WifiClient *WifiClient::instance()
@@ -82,6 +96,25 @@ void WifiClient::addNetwork(const QString &ssid, const QString &password)
     station->AddNetwork(ssid, password);
 }
 
+void WifiClient::p2pStart()
+{
+    peers->Start();
+}
+
+void WifiClient::p2pStop()
+{
+    peers->Stop();
+}
+
+void WifiClient::p2pConnectPBC(const QString &address)
+{
+    QVariantMap paramMap;
+    paramMap["method"] = "pbc";
+    paramMap["address"] = address;
+    QJsonDocument doc = QJsonDocument::fromVariant(paramMap);
+    peers->Connect(doc.toJson());
+}
+
 void WifiClient::onAccessPointUpdated(const QString &point)
 {
     Q_EMIT accessPointUpdated(point);
@@ -90,4 +123,14 @@ void WifiClient::onAccessPointUpdated(const QString &point)
 void WifiClient::onStatusChanged(const QString &status)
 {
     Q_EMIT statusChanged(status);
+}
+
+void WifiClient::onServiceRegistered(const QString &service)
+{
+    qDebug() << Q_FUNC_INFO << service;
+}
+
+void WifiClient::onServiceUnregistered(const QString &service)
+{
+    qDebug() << Q_FUNC_INFO << service;
 }
