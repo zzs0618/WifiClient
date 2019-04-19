@@ -8,6 +8,7 @@
 
         <method name="Open" />
         <method name="Close" />
+
         <method name="AddNetwork" >
             <arg name="ssid" type="s" direction="in"/>
             <arg name="password" type="s" direction="in"/>
@@ -96,33 +97,6 @@
                 ssid        接入点的SSID
             -->
             <arg name="point" type="s" direction="out"/>
-        </signal>
-        <signal name="NetworkUpdate">
-            <!--
-            参数: network
-            摘要: 该参数表示已更新 WIFI Network的 JSON 格式数据
-            数据结构:
-                id          Network的Id
-                bssid       Network的SSID
-                ssid        Network的SSID
-                frequency   Network的频率
-                rssi        Network的信号强度
-                security    Network的安全认证方式
-                                NoneOpen        = 0x00
-                                NoneWEP         = 0x01
-                                NoneWEPShared   = 0x02
-                                IEEE8021X       = 0x04
-                                WPA_PSK         = 0x08
-                                WPA_EAP         = 0x10
-                                WPA2_PSK        = 0x20
-                                WPA2_EAP        = 0x40
-                encrytion   Network的加密方式
-                                None    = 0x00
-                                WEP     = 0x01
-                                TKIP    = 0x02
-                                CCMP    = 0x04
-            -->
-            <arg name="network" type="s" direction="out"/>
         </signal>
     </interface>
 </node>

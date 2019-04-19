@@ -10,8 +10,7 @@ Item {
     Rectangle {
         id: titleWLAN
         width: parent.width
-        height: 50
-        //        Material.elevation: 5
+        height: 80
         z: 1
 
         Text {
@@ -19,6 +18,7 @@ Item {
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             font.bold: true
+            font.pixelSize: 32
             color: switchWLAN.checked ? "#E91E63" : "#9E9E9E"
             text: qsTr("开启WLAN")
         }
@@ -57,17 +57,16 @@ Item {
         section.property: "type"
         section.criteria: ViewSection.FullString
         section.delegate: Component {
-            Rectangle {
+            Item {
                 width: listWLAN.width
-                height: 16
-                color: "lightgray"
+                height: 24
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: section == "2" ? qsTr(
                                                "当前的WLAN") : (section
                                                              == "1" ? qsTr("已连接的WLAN") : qsTr(
                                                                           "选取附近的WLAN"))
-                    font.pixelSize: 12
+                    font.pixelSize: 22
                     color: "gray"
                 }
             }
@@ -100,15 +99,20 @@ Item {
                 signalLevel: 3
             }
         }
+        spacing: 5
 
-        delegate: Item {
-            x: 5
+        delegate: Rectangle {
             width: listWLAN.width
-            height: 40
+            height: 60
+            color: "#88CCCCCC"
             Row {
-                spacing: 10
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 20
                 Image {
                     id: icon
+                    anchors.verticalCenter: parent.verticalCenter
                     source: "qrc:/res/wifi_level_" + signalLevel + ".png"
                 }
                 Text {
@@ -116,6 +120,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     elide: Text.ElideRight
                     color: "#4CAF50"
+                    font.pixelSize: 32
                     text: if (type == 2)
                               return ssid + "(" + wifiAPModel.status["ipAddress"] + ")"
                           else

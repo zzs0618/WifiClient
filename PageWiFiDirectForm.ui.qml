@@ -7,7 +7,7 @@ Item {
     Rectangle {
         id: titleP2P
         width: parent.width
-        height: 50
+        height: 80
         z: 1
 
         Text {
@@ -15,6 +15,7 @@ Item {
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             font.bold: true
+            font.pixelSize: 32
             color: switchP2P.checked ? "#E91E63" : "#9E9E9E"
             text: qsTr("开启P2P")
         }
@@ -78,14 +79,18 @@ Item {
             }
         }
 
-        delegate: Item {
-            x: 5
+        delegate: Rectangle {
             width: listP2PDevices.width
-            height: 40
+            height: 60
+            color: "#88CCCCCC"
             Row {
-                spacing: 10
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 20
                 Image {
                     id: icon
+                    anchors.verticalCenter: parent.verticalCenter
                     source: "qrc:/res/p2p_device_" + type + ".png"
                 }
                 Text {
@@ -93,6 +98,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     elide: Text.ElideRight
                     color: "#4CAF50"
+                    font.pixelSize: 32
                     text: name
                 }
             }
