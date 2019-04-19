@@ -5,6 +5,7 @@ PageWiFiConnectForm {
 
     WifiAccessPointModel {
         id: wifiAPModel
+        isOpen: switchWLAN.checked
     }
 
     listWLAN.model: SortFilterProxyModel {

@@ -45,6 +45,7 @@ public:
 
 protected slots:
     void onDeviceFound(const QString &devcie);
+    void onDeviceCleard();
 
 private:
     bool m_componentCompleted = false;

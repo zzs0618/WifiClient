@@ -28,10 +28,14 @@ wifi::helper::Peers *peers = NULL;
 
 WifiClient::WifiClient(QObject *parent) : QObject(parent)
 {
+    QDBusConnection conn = QDBusConnection::systemBus();
+
     station = new wifi::helper::Station("wifi.helper.service",
                                         "/Station",
-                                        QDBusConnection::systemBus());
+                                        conn);
 
+
+    connect(station, SIGNAL(IsOpenChanged(bool)), SLOT(onIsOpenChanged(bool)));
     connect(station, SIGNAL(AccessPointAdded(QString)),
             SIGNAL(accessPointAdded(QString)));
     connect(station, SIGNAL(AccessPointRemoved(QString)),
@@ -45,7 +49,7 @@ WifiClient::WifiClient(QObject *parent) : QObject(parent)
 
     peers = new wifi::helper::Peers("wifi.helper.service",
                                     "/Peers",
-                                    QDBusConnection::systemBus());
+                                    conn);
     connect(peers, SIGNAL(DeviceFound(QString)), SIGNAL(p2pDeviceFound(QString)));
 
     QDBusServiceWatcher *wather = new QDBusServiceWatcher("wifi.helper.service",
@@ -54,6 +58,13 @@ WifiClient::WifiClient(QObject *parent) : QObject(parent)
             SLOT(onServiceRegistered(QString)));
     connect(wather, SIGNAL(serviceUnregistered(QString)),
             SLOT(onServiceUnregistered(QString)));
+
+    QDBusReply<bool> reply =
+                    conn.interface()->isServiceRegistered("wifi.helper.service");
+    m_isServiced = reply.value();
+    if(m_isServiced) {
+        m_isOpen = station->isOpen();
+    }
 }
 
 WifiClient *WifiClient::instance()
@@ -62,14 +73,47 @@ WifiClient *WifiClient::instance()
     return client;
 }
 
+bool WifiClient::isOpen() const
+{
+    return m_isOpen;
+}
+
+void WifiClient::setIsOpen(bool open)
+{
+    if(m_isOpen == open) {
+        return;
+    }
+    m_isOpen = open;
+    emit isOpenChanged();
+
+    if(m_isOpen) {
+        if(m_isServiced) {
+            station->Open();
+        }
+    } else {
+        if(m_isServiced) {
+            station->Close();
+        }
+        emit statusChanged(QString());
+        emit accessPointCleard();
+        emit p2pDeviceCleard();
+    }
+}
+
 QVariantMap WifiClient::status() const
 {
+    if(!isOpen()) {
+        return QVariantMap();
+    }
     QJsonDocument doc = QJsonDocument::fromJson(station->status().toUtf8());
     return doc.toVariant().toMap();
 }
 
 QVariantList WifiClient::accessPoints() const
 {
+    if(!isOpen()) {
+        return QVariantList();
+    }
     QJsonDocument doc = QJsonDocument::fromJson(station->accessPoints().toUtf8());
     QVariantList list;
     for(QVariant var : doc.array().toVariantList()) {
@@ -115,6 +159,11 @@ void WifiClient::p2pConnectPBC(const QString &address)
     peers->Connect(doc.toJson());
 }
 
+void WifiClient::onIsOpenChanged(bool open)
+{
+    setIsOpen(open);
+}
+
 void WifiClient::onAccessPointUpdated(const QString &point)
 {
     Q_EMIT accessPointUpdated(point);
@@ -128,9 +177,11 @@ void WifiClient::onStatusChanged(const QString &status)
 void WifiClient::onServiceRegistered(const QString &service)
 {
     qDebug() << Q_FUNC_INFO << service;
+    //    setIsOpen(true);
 }
 
 void WifiClient::onServiceUnregistered(const QString &service)
 {
     qDebug() << Q_FUNC_INFO << service;
+    setIsOpen(false);
 }

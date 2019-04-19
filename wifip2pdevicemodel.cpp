@@ -29,6 +29,8 @@ WifiP2PDeviceModel::WifiP2PDeviceModel(QObject *parent) :
     WifiClient *client = WifiClient::instance();
     connect(client, SIGNAL(p2pDeviceFound(QString)),
             SLOT(onDeviceFound(QString)));
+    connect(client, SIGNAL(p2pDeviceCleard()),
+            SLOT(onDeviceCleard()));
 }
 
 int WifiP2PDeviceModel::rowCount(const QModelIndex &) const
@@ -93,4 +95,11 @@ void WifiP2PDeviceModel::onDeviceFound(const QString &device)
     beginInsertRows(QModelIndex(), count, count);
     m_devcies << doc.toVariant().toMap();
     endInsertRows();
+}
+
+void WifiP2PDeviceModel::onDeviceCleard()
+{
+    beginResetModel();
+    m_devcies.clear();
+    endResetModel();
 }

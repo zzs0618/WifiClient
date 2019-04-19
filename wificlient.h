@@ -27,6 +27,9 @@ class WifiClient : public QObject
 public:
     static WifiClient *instance();
 
+    bool isOpen() const;
+    void setIsOpen(bool open);
+
     QVariantMap status() const;
 
     QVariantList accessPoints() const;
@@ -38,17 +41,18 @@ public:
     void p2pConnectPBC(const QString &address);
 
 signals:
+    void isOpenChanged();
+    void statusChanged(const QString &status);
     void accessPointAdded(const QString &point);
     void accessPointUpdated(const QString &point);
     void accessPointRemoved(const QString &point);
-    void statusChanged(const QString &status);
-    void enabledChanged();
+    void accessPointCleard();
 
     void p2pDeviceFound(const QString &devcie);
-
-public slots:
+    void p2pDeviceCleard();
 
 protected slots:
+    void onIsOpenChanged(bool open);
     void onAccessPointUpdated(const QString &point);
     void onStatusChanged(const QString &status);
 
@@ -57,6 +61,10 @@ protected slots:
 
 private:
     explicit WifiClient(QObject *parent = nullptr);
+
+private:
+    bool m_isOpen = false;
+    bool m_isServiced = false;
 };
 
 #endif // WIFICLIENT_H

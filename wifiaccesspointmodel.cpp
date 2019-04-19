@@ -27,6 +27,7 @@ WifiAccessPointModel::WifiAccessPointModel(QObject *parent) :
     QAbstractListModel(parent)
 {
     WifiClient *client = WifiClient::instance();
+    connect(client, SIGNAL(isOpenChanged()), SIGNAL(isOpenChanged()));
     connect(client, SIGNAL(statusChanged(QString)),
             SLOT(onStatusChanged(QString)));
     connect(client, SIGNAL(accessPointAdded(QString)),
@@ -35,9 +36,22 @@ WifiAccessPointModel::WifiAccessPointModel(QObject *parent) :
             SLOT(onAccessPointUpdated(QString)));
     connect(client, SIGNAL(accessPointRemoved(QString)),
             SLOT(onAccessPointRemoved(QString)));
+    connect(client, SIGNAL(accessPointCleard()), SLOT(onAccessPointCleard()));
 
     m_status = client->status();
     m_wifiAPs = client->accessPoints();
+}
+
+bool WifiAccessPointModel::isOpen() const
+{
+    WifiClient *client = WifiClient::instance();
+    return client->isOpen();
+}
+
+void WifiAccessPointModel::setIsOpen(bool open)
+{
+    WifiClient *client = WifiClient::instance();
+    client->setIsOpen(open);
 }
 
 QVariantMap WifiAccessPointModel::status() const
@@ -161,6 +175,13 @@ void WifiAccessPointModel::onAccessPointRemoved(const QString &point)
             endRemoveRows();
         }
     }
+}
+
+void WifiAccessPointModel::onAccessPointCleard()
+{
+    beginResetModel();
+    m_wifiAPs.clear();
+    endResetModel();
 }
 
 int WifiAccessPointModel::indexOf(const QString &ssid)

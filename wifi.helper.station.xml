@@ -2,6 +2,7 @@
     "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
     <interface name="wifi.helper.Station">
+        <property name="IsOpen" type="b" access="read"/>
         <property name="Status" type="s" access="read"/>
         <property name="AccessPoints" type="s" access="read"/>
 
@@ -18,6 +19,9 @@
             <arg name="id" type="i" direction="in"/>
         </method>
 
+        <signal name="IsOpenChanged">
+            <arg name="isOpen" type="b" direction="out"/>
+        </signal>
         <signal name="StatusChanged">
             <!--
             参数：status

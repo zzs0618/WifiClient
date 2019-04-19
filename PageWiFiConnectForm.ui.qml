@@ -1,8 +1,10 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.1
 
+
 //import QtQuick.Controls.Material 2.1
 Item {
+    property alias switchWLAN: switchWLAN
     property alias listWLAN: listWLAN
 
     Rectangle {
@@ -26,6 +28,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 10
+            checked: wifiAPModel.isOpen
         }
     }
     Rectangle {
@@ -60,9 +63,10 @@ Item {
                 color: "lightgray"
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: section == "2" ? qsTr("当前的WLAN") :
-                                           (section == "1" ? qsTr("已连接的WLAN") :
-                                                             qsTr("选取附近的WLAN"))
+                    text: section == "2" ? qsTr(
+                                               "当前的WLAN") : (section
+                                                             == "1" ? qsTr("已连接的WLAN") : qsTr(
+                                                                          "选取附近的WLAN"))
                     font.pixelSize: 12
                     color: "gray"
                 }
@@ -112,7 +116,10 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     elide: Text.ElideRight
                     color: "#4CAF50"
-                    text: if(type==2) return ssid + "("+ wifiAPModel.status["ipAddress"] +")"; else return ssid;
+                    text: if (type == 2)
+                              return ssid + "(" + wifiAPModel.status["ipAddress"] + ")"
+                          else
+                              return ssid
                 }
             }
             MouseArea {
